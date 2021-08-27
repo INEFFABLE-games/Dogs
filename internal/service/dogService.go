@@ -22,7 +22,7 @@ func (p *DogService) Create(ctx context.Context, dog models.Dog) error {
 
 func (p *DogService) Get(ctx context.Context, name string) (models.Dog, error) {
 
-	resultDog, err := p.dogRepo.Get(ctx, dog)
+	resultDog, err := p.dogRepo.Get(ctx, name)
 	if err != nil {
 		log.Println(err)
 	}
