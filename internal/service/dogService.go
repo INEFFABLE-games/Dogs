@@ -1,10 +1,10 @@
 package service
 
 import (
-	"Dogs/internal/models"
-	"Dogs/internal/repository"
 	"context"
 	"log"
+	"main/internal/models"
+	"main/internal/repository"
 )
 
 type DogService struct {

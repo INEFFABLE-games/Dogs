@@ -1,14 +1,14 @@
 package main
 
 import (
-	"Dogs/internal/handler"
-	"Dogs/internal/repository"
-	"Dogs/internal/service"
 	"database/sql"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"log"
+	"main/internal/handler"
+	"main/internal/repository"
+	"main/internal/service"
 	"net/http"
 )
 

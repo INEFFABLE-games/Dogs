@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"Dogs/internal/models"
 	"context"
 	"database/sql"
 	"log"
+	"main/internal/models"
 )
 
 type DogPostgresRepository struct {
