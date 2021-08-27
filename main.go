@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"github.com/caarlos0/env/v6"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
-	"log"
+	log "github.com/sirupsen/logrus"
+	"main/internal/config"
 	"main/internal/handler"
 	"main/internal/repository"
 	"main/internal/service"
@@ -30,7 +32,12 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 func main() {
 
-	base, err := sql.Open("postgres", "port=5432 host=localhost user=postgres password=12345 dbname=dogs sslmode=disable")
+	cfg := config.Config{}
+	if err := env.Parse(&cfg); err != nil {
+		log.Println(err)
+	}
+
+	base, err := sql.Open("postgres", "port="+cfg.Port+" host="+cfg.Host+" user="+cfg.User+" password="+cfg.Password+" dbname="+cfg.Dbname+" sslmode="+cfg.Sslmode)
 	if err != nil {
 		log.Fatal(err)
 	}
