@@ -3,10 +3,9 @@ package handler
 import (
 	"context"
 	"github.com/labstack/echo/v4"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"main/internal/models"
 	"main/internal/service"
-	"net/http"
 	"time"
 )
 
@@ -24,7 +23,11 @@ func (h *DogHandler) Create(c echo.Context) error {
 
 	err = c.Validate(dog)
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  err.Error(),
+			Internal: nil,
+		}
 	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
 
@@ -34,35 +37,41 @@ func (h *DogHandler) Create(c echo.Context) error {
 	}
 
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  err.Error(),
+			Internal: nil,
+		}
 	}
-	return c.String(http.StatusOK, "Dog created!")
+	return &echo.HTTPError{
+		Code:     200,
+		Message:  "Dog created!",
+		Internal: nil,
+	}
 }
 
 func (h *DogHandler) Get(c echo.Context) error {
 
-	dog := models.Dog{}
-	err := c.Bind(&dog)
-	if err != nil {
-		log.Println(err)
-	}
-
-	err = c.Validate(dog)
-	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
-	}
-
+	name := c.QueryParam("name")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
 
-	resultDog, err := h.dogService.Get(ctx, dog)
+	resultDog, err := h.dogService.Get(ctx, name)
 	if err != nil {
 		log.Println(err)
 	}
 
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  err.Error(),
+			Internal: nil,
+		}
 	}
-	return c.JSON(http.StatusOK, resultDog)
+	return &echo.HTTPError{
+		Code:     200,
+		Message:  resultDog,
+		Internal: nil,
+	}
 }
 
 func (h *DogHandler) Change(c echo.Context) error {
@@ -77,12 +86,16 @@ func (h *DogHandler) Change(c echo.Context) error {
 	//validate dog data
 	err = c.Validate(dog)
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  err.Error(),
+			Internal: nil,
+		}
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
 	//check is dog exist
-	_, err = h.dogService.Get(ctx, models.Dog{Name: name})
+	_, err = h.dogService.Get(ctx, name)
 	if err != nil {
 		log.Println(err)
 	}
@@ -92,9 +105,17 @@ func (h *DogHandler) Change(c echo.Context) error {
 		log.Println(err)
 	}
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  err.Error(),
+			Internal: nil,
+		}
 	}
-	return c.String(http.StatusOK, "Dog was changed!")
+	return &echo.HTTPError{
+		Code:     200,
+		Message:  "Dog was changed!",
+		Internal: nil,
+	}
 }
 
 func (h *DogHandler) Delete(c echo.Context) error {
@@ -104,18 +125,29 @@ func (h *DogHandler) Delete(c echo.Context) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
 
 	//check is dog exist
-	_, err := h.dogService.Get(ctx, models.Dog{Name: name})
+	_, err := h.dogService.Get(ctx, name)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Dog doesnt exist!")
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  "Dog doesnt exist!",
+			Internal: nil,
+		}
 	}
 
 	err = h.dogService.Delete(ctx, name)
 	if err != nil {
 		log.Println(err)
-		return c.String(http.StatusBadRequest, err.Error())
+		return &echo.HTTPError{
+			Code:     400,
+			Message:  err.Error(),
+			Internal: nil,
+		}
 	}
-
-	return c.String(http.StatusOK, "Dog was deleted!")
+	return &echo.HTTPError{
+		Code:     200,
+		Message:  "Dog was deleted!",
+		Internal: nil,
+	}
 }
 
 func NewDogHanlder(dogService *service.DogService) DogHandler {

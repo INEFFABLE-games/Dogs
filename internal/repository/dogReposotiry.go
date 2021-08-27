@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"main/internal/models"
 )
 
@@ -20,10 +20,10 @@ func (d *DogPostgresRepository) Add(ctx context.Context, dog models.Dog) error {
 	return err
 }
 
-func (d *DogPostgresRepository) Get(ctx context.Context, dog models.Dog) (models.Dog, error) {
+func (d *DogPostgresRepository) Get(ctx context.Context, name string) (models.Dog, error) {
 
 	resultDog := models.Dog{}
-	err := d.db.QueryRowContext(ctx, "select * from dogs where name = $1", dog.Name).Scan(&resultDog.Name, &resultDog.Gender)
+	err := d.db.QueryRowContext(ctx, "select * from dogs where name = $1", name).Scan(&resultDog.Name, &resultDog.Gender)
 	if err != nil {
 		log.Println(err)
 	}
