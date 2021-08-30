@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/labstack/echo/v4"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"main/internal/models"
 	"main/internal/service"
 	"net/http"

@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"main/internal/config"
 	"main/internal/handler"
 	"main/internal/repository"
