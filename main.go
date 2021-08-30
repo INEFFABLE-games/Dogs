@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/caarlos0/env/v6"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
@@ -19,8 +18,8 @@ type server struct {
 	dogRepo repository.DogRepository
 }
 
-func newServer(dogRepo repository.DogRepository) server {
-	return server{dogRepo: dogRepo}
+func newServer(dogRepo *repository.DogRepository) *server {
+	return &server{dogRepo: *dogRepo}
 }
 
 type customValidator struct {
@@ -37,11 +36,8 @@ func (cv *customValidator) Validate(i interface{}) error {
 }
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	cfg := config.NewConfig()
-
-	if err := env.Parse(&cfg); err != nil {
-		log.Errorf("main: unable to pars environment variables %v,", err)
-	}
 
 	base, err := sql.Open("postgres", fmt.Sprintf("port=%s host=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Port,
