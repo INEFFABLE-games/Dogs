@@ -3,54 +3,44 @@ package repository
 import (
 	"context"
 	"database/sql"
-	log "github.com/sirupsen/logrus"
 	"main/internal/models"
 )
 
-type DogPostgresRepository struct {
+// DogRepository creates new dogs repository.
+type DogRepository struct {
 	db *sql.DB
 }
 
-func (d *DogPostgresRepository) Add(ctx context.Context, dog models.Dog) error {
-
+// Add insert add query in db.
+func (d *DogRepository) Add(ctx context.Context, dog models.Dog) error {
 	_, err := d.db.ExecContext(ctx, "insert into dogs(Name,Gender) values($1,$2)", dog.Name, dog.Gender)
-	if err != nil {
-		log.Println(err)
-	}
+
 	return err
 }
 
-func (d *DogPostgresRepository) Get(ctx context.Context, name string) (models.Dog, error) {
-
+// Get insert select query in db and return dog object.
+func (d *DogRepository) Get(ctx context.Context, name string) (models.Dog, error) {
 	resultDog := models.Dog{}
 	err := d.db.QueryRowContext(ctx, "select * from dogs where name = $1", name).Scan(&resultDog.Name, &resultDog.Gender)
-	if err != nil {
-		log.Println(err)
-	}
 
 	return resultDog, err
 }
 
-func (d *DogPostgresRepository) Change(ctx context.Context, name string, dog models.Dog) error {
-
+// Change insert change query in db.
+func (d *DogRepository) Change(ctx context.Context, name string, dog models.Dog) error {
 	_, err := d.db.ExecContext(ctx, "update dogs set name = $1, gender = $2 where name = $3", dog.Name, dog.Gender, name)
-	if err != nil {
-		log.Println(err)
-	}
 
 	return err
 }
 
-func (d *DogPostgresRepository) Delete(ctx context.Context, name string) error {
-
+// Delete insert delete query in db.
+func (d *DogRepository) Delete(ctx context.Context, name string) error {
 	_, err := d.db.ExecContext(ctx, "delete from dogs where name = $1", name)
-	if err != nil {
-		log.Println(err)
-	}
 
 	return err
 }
 
-func NewDogPostgresRepository(db *sql.DB) DogPostgresRepository {
-	return DogPostgresRepository{db: db}
+// NewDogRepository creates new repository for dogs.
+func NewDogRepository(db *sql.DB) DogRepository {
+	return DogRepository{db: db}
 }

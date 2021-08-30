@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
-	log "github.com/sirupsen/logrus"
+	"log"
 	"main/internal/config"
 	"main/internal/handler"
 	"main/internal/repository"
@@ -14,15 +14,15 @@ import (
 	"net/http"
 )
 
-type Server struct {
-	dogRepo repository.DogPostgresRepository
+type server struct {
+	dogRepo repository.DogRepository
 }
 
-type CustomValidator struct {
+type customValidator struct {
 	validator *validator.Validate
 }
 
-func (cv *CustomValidator) Validate(i interface{}) error {
+func (cv *customValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
 		// Optionally, you could return the error to give each route more control over the status code
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -31,7 +31,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func main() {
-
 	cfg := config.Config{}
 	if err := env.Parse(&cfg); err != nil {
 		log.Println(err)
@@ -44,14 +43,14 @@ func main() {
 	if err := base.Ping(); err != nil {
 		log.Println(err)
 	}
-	s := Server{}
-	s.dogRepo = repository.NewDogPostgresRepository(base)
+	s := server{}
+	s.dogRepo = repository.NewDogRepository(base)
 	dogService := service.NewDogService(s.dogRepo)
 
 	dogHabdler := handler.NewDogHanlder(dogService)
 
 	e := echo.New()
-	e.Validator = &CustomValidator{validator: validator.New()}
+	e.Validator = &customValidator{validator: validator.New()}
 
 	e.PUT("/dogs/", dogHabdler.Create)
 	e.GET("/dogs/", dogHabdler.Get)
@@ -59,5 +58,4 @@ func main() {
 	e.DELETE("/dogs/", dogHabdler.Delete)
 
 	e.Logger.Fatal(e.Start(":1323"))
-
 }
