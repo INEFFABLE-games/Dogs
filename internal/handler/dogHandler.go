@@ -19,12 +19,14 @@ const ctxtime = 5
 
 // Create func for echo request.
 func (h *DogHandler) Create(c echo.Context) error {
-	log.SetLevel(log.DebugLevel)
-	dog := models.NewDog("", "")
+	dog := models.Dog{}
 
 	err := c.Bind(&dog)
 	if err != nil {
-		log.Errorf("dogHandler: unable to bind dog data %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "bind model",
+		}).Errorf("dogHandler: unable to bind dog data %v,", err)
 	}
 
 	err = c.Validate(dog)
@@ -37,7 +39,10 @@ func (h *DogHandler) Create(c echo.Context) error {
 
 	err = h.dogService.Create(ctx, dog)
 	if err != nil {
-		log.Errorf("unable to create dog %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "create",
+		}).Errorf("unable to create dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -47,7 +52,7 @@ func (h *DogHandler) Create(c echo.Context) error {
 		"action":  "create",
 	}).Debug("dog has been created")
 
-	return echo.NewHTTPError(http.StatusOK, "Dog was created")
+	return c.String(http.StatusOK, "Dog was created")
 }
 
 // Get func for echo request.
@@ -59,7 +64,10 @@ func (h *DogHandler) Get(c echo.Context) error {
 
 	resultDog, err := h.dogService.Get(ctx, name)
 	if err != nil {
-		log.Errorf("dogHandler: unable to get dog %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "get",
+		}).Errorf("dogHandler: unable to get dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -69,16 +77,19 @@ func (h *DogHandler) Get(c echo.Context) error {
 		"action":  "get",
 	}).Debugf("replyed dog %v", resultDog)
 
-	return echo.NewHTTPError(http.StatusOK, resultDog)
+	return c.JSON(http.StatusOK, resultDog)
 }
 
 // Change func for echo request.
 func (h *DogHandler) Change(c echo.Context) error {
-	dog := models.NewDog("", "")
+	dog := models.Dog{}
 
 	err := c.Bind(&dog)
 	if err != nil {
-		log.Errorf("unable to bind dog %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "bind model",
+		}).Errorf("unable to bind dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -97,14 +108,20 @@ func (h *DogHandler) Change(c echo.Context) error {
 	// check is dog exist
 	_, err = h.dogService.Get(ctx, name)
 	if err != nil {
-		log.Errorf("unable to get dog %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "get",
+		}).Errorf("unable to get dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = h.dogService.Change(ctx, name, dog)
 	if err != nil {
-		log.Errorf("dogHandler: unable to cahnge dog %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "change",
+		}).Errorf("dogHandler: unable to cahnge dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -113,7 +130,8 @@ func (h *DogHandler) Change(c echo.Context) error {
 		"handler": "dog",
 		"action":  "cahnge",
 	}).Debug("dog has been changed")
-	return echo.NewHTTPError(http.StatusOK, "Dog has been changed")
+
+	return c.String(http.StatusOK, "Dog has been changed")
 }
 
 // Delete func for echo request.
@@ -131,7 +149,10 @@ func (h *DogHandler) Delete(c echo.Context) error {
 
 	err = h.dogService.Delete(ctx, name)
 	if err != nil {
-		log.Errorf("unable to delete dog %v,", err)
+		log.WithFields(log.Fields{
+			"handler": "dog",
+			"action":  "delete",
+		}).Errorf("unable to delete dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -140,10 +161,11 @@ func (h *DogHandler) Delete(c echo.Context) error {
 		"handler": "dog",
 		"action":  "delete",
 	}).Debug("dog was deleted")
-	return echo.NewHTTPError(http.StatusOK, "Dog was deleted")
+
+	return c.String(http.StatusOK, "Dog was deleted")
 }
 
 // NewDogHandler create new handler for echo.
-func NewDogHandler(dogService *service.DogService) DogHandler {
-	return DogHandler{dogService: dogService}
+func NewDogHandler(dogService *service.DogService) *DogHandler {
+	return &DogHandler{dogService: dogService}
 }
