@@ -1,5 +1,10 @@
 package config
 
+import (
+	"github.com/caarlos0/env/v6"
+	log "github.com/sirupsen/logrus"
+)
+
 // Config creates new database connection config from env variables.
 type Config struct {
 	Port     string `env:"SQLPORT,required,notEmpty"`
@@ -11,15 +16,17 @@ type Config struct {
 }
 
 // NewConfig create new config object.
-func NewConfig() Config {
-	return Config{
-		Port:     "",
-		Host:     "",
-		User:     "",
-		Password: "",
-		Dbname:   "",
-		Sslmode:  "",
+func NewConfig() *Config {
+
+	cfg := Config{}
+	if err := env.Parse(&cfg); err != nil {
+		log.WithFields(log.Fields{
+			"handler": "config",
+			"action":  "initialize",
+		}).Errorf("unable to pars environment variables %v,", err)
 	}
+
+	return &cfg
 }
 
 // POSTGRES_URI = port=5432 host=localhost user=postgres password=12345 dbname=dogs sslmode=disable
