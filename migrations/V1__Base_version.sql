@@ -1,6 +1,4 @@
-drop table dogs;
-
 create table dogs(
-    name varchar(250),
+    name varchar(250) PRIMARY KEY,
     gender varchar(250)
 );
