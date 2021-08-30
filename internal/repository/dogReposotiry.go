@@ -20,7 +20,7 @@ func (d *DogRepository) Add(ctx context.Context, dog models.Dog) error {
 
 // Get insert select query in db and return dog object.
 func (d *DogRepository) Get(ctx context.Context, name string) (models.Dog, error) {
-	resultDog := models.Dog{}
+	resultDog := models.NewDog("", "")
 	err := d.db.QueryRowContext(ctx, "select * from dogs where name = $1", name).Scan(&resultDog.Name, &resultDog.Gender)
 
 	return resultDog, err

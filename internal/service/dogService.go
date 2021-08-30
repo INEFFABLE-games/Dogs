@@ -13,30 +13,22 @@ type DogService struct {
 
 // Create calls add func on dog repository.
 func (p *DogService) Create(ctx context.Context, dog models.Dog) error {
-	err := p.dogRepo.Add(ctx, dog)
-
-	return err
+	return p.dogRepo.Add(ctx, dog)
 }
 
 // Get call get func on dog repository.
 func (p *DogService) Get(ctx context.Context, name string) (models.Dog, error) {
-	resultDog, err := p.dogRepo.Get(ctx, name)
-
-	return resultDog, err
+	return p.dogRepo.Get(ctx, name)
 }
 
 // Change call change func on dog repository.
 func (p *DogService) Change(ctx context.Context, name string, dog models.Dog) error {
-	err := p.dogRepo.Change(ctx, name, dog)
-
-	return err
+	return p.dogRepo.Change(ctx, name, dog)
 }
 
 // Delete call delete func on dog repository.
 func (p *DogService) Delete(ctx context.Context, name string) error {
-	err := p.dogRepo.Delete(ctx, name)
-
-	return err
+	return p.dogRepo.Delete(ctx, name)
 }
 
 // NewDogService creates new dog service.

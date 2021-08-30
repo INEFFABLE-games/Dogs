@@ -10,4 +10,16 @@ type Config struct {
 	Sslmode  string `env:"SQLSSLMODE,required,notEmpty"`
 }
 
+// NewConfig create new config object.
+func NewConfig() Config {
+	return Config{
+		Port:     "",
+		Host:     "",
+		User:     "",
+		Password: "",
+		Dbname:   "",
+		Sslmode:  "",
+	}
+}
+
 // POSTGRES_URI = port=5432 host=localhost user=postgres password=12345 dbname=dogs sslmode=disable
