@@ -2,31 +2,39 @@ package handler
 
 import (
 	"context"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
 	"main/internal/models"
 	"main/internal/service"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
+
+const dogHandler = "dog"
+
+const ctxTime = 5
 
 // DogHandler creates new dog handler.
 type DogHandler struct {
 	dogService *service.DogService
 }
 
-const ctxtime = 5
-
 // Create func for echo request.
 func (h *DogHandler) Create(c echo.Context) error {
 	dog := models.Dog{}
 
+	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
+
 	err := c.Bind(&dog)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "bind model",
 		}).Errorf("dogHandler: unable to bind dog data %v,", err)
+
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = c.Validate(dog)
@@ -34,13 +42,13 @@ func (h *DogHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*ctxtime)
+	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer cancel()
 
-	err = h.dogService.Create(ctx, dog)
+	err = h.dogService.Create(ctx, dog, token)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "create",
 		}).Errorf("unable to create dog %v,", err)
 
@@ -48,7 +56,7 @@ func (h *DogHandler) Create(c echo.Context) error {
 	}
 
 	log.WithFields(log.Fields{
-		"handler": "dog",
+		"handler": dogHandler,
 		"action":  "create",
 	}).Debug("dog has been created")
 
@@ -57,15 +65,15 @@ func (h *DogHandler) Create(c echo.Context) error {
 
 // Get func for echo request.
 func (h *DogHandler) Get(c echo.Context) error {
-	name := c.QueryParam("name")
+	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
 
-	ctx, cancle := context.WithTimeout(c.Request().Context(), time.Second*ctxtime)
+	ctx, cancle := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer cancle()
 
-	resultDog, err := h.dogService.Get(ctx, name)
+	resultDog, err := h.dogService.Get(ctx, token)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "get",
 		}).Errorf("dogHandler: unable to get dog %v,", err)
 
@@ -73,7 +81,7 @@ func (h *DogHandler) Get(c echo.Context) error {
 	}
 
 	log.WithFields(log.Fields{
-		"handler": "dog",
+		"handler": dogHandler,
 		"action":  "get",
 	}).Debugf("replyed dog %v", resultDog)
 
@@ -84,17 +92,17 @@ func (h *DogHandler) Get(c echo.Context) error {
 func (h *DogHandler) Change(c echo.Context) error {
 	dog := models.Dog{}
 
+	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
+
 	err := c.Bind(&dog)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "bind model",
-		}).Errorf("unable to bind dog %v,", err)
+		}).Errorf("unable to bind dog , %v ", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
-	name := c.QueryParam("name")
 
 	// validate dog data
 	err = c.Validate(dog)
@@ -102,33 +110,33 @@ func (h *DogHandler) Change(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	ctx, cancle := context.WithTimeout(c.Request().Context(), time.Second*ctxtime)
+	ctx, cancle := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer cancle()
 
 	// check is dog exist
-	_, err = h.dogService.Get(ctx, name)
+	_, err = h.dogService.Get(ctx, token)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "get",
 		}).Errorf("unable to get dog %v,", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = h.dogService.Change(ctx, name, dog)
+	err = h.dogService.Change(ctx, token, dog)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "change",
-		}).Errorf("dogHandler: unable to cahnge dog %v,", err)
+		}).Errorf("dogHandler: unable to cahnge dog , %v", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	log.WithFields(log.Fields{
-		"handler": "dog",
-		"action":  "cahnge",
+		"handler": dogHandler,
+		"action":  "change",
 	}).Debug("dog has been changed")
 
 	return c.String(http.StatusOK, "Dog has been changed")
@@ -136,29 +144,24 @@ func (h *DogHandler) Change(c echo.Context) error {
 
 // Delete func for echo request.
 func (h *DogHandler) Delete(c echo.Context) error {
-	name := c.QueryParam("name")
 
-	ctx, canlce := context.WithTimeout(c.Request().Context(), time.Second*ctxtime)
+	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
+
+	ctx, canlce := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer canlce()
 
-	// check is dog exist
-	_, err := h.dogService.Get(ctx, name)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Dog doesn't exist")
-	}
-
-	err = h.dogService.Delete(ctx, name)
+	err := h.dogService.Delete(ctx, token)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"handler": "dog",
+			"handler": dogHandler,
 			"action":  "delete",
-		}).Errorf("unable to delete dog %v,", err)
+		}).Errorf("unable to delete dog , %v", err)
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	log.WithFields(log.Fields{
-		"handler": "dog",
+		"handler": dogHandler,
 		"action":  "delete",
 	}).Debug("dog was deleted")
 
