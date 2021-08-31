@@ -15,11 +15,15 @@ import (
 )
 
 type server struct {
-	dogRepo repository.DogRepository
+	dogRepo  repository.DogRepository
+	userRepo repository.UserRepository
 }
 
-func newServer(dogRepo *repository.DogRepository) *server {
-	return &server{dogRepo: *dogRepo}
+func newServer(dogRepo *repository.DogRepository, userRepo *repository.UserRepository) *server {
+	return &server{
+		dogRepo:  *dogRepo,
+		userRepo: *userRepo,
+	}
 }
 
 type customValidator struct {
@@ -54,19 +58,29 @@ func main() {
 		log.Errorf("main: unable to ping sql connection %v,", err)
 	}
 
-	s := newServer(repository.NewDogRepository(base))
+	s := newServer(repository.NewDogRepository(base), repository.NewUserRepository(base))
 	dogService := service.NewDogService(s.dogRepo)
 	dogHandler := handler.NewDogHandler(dogService)
+
+	userService := service.NewUserService(s.userRepo)
+	userHandler := handler.NewUserHandler(userService)
 
 	e := echo.New()
 	e.Validator = &customValidator{validator: validator.New()}
 
 	dogsPath := "/dogs/"
+	usersPath := "/users/"
 
+	//dog routs
 	e.PUT(dogsPath, dogHandler.Create)
 	e.GET(dogsPath, dogHandler.Get)
 	e.POST(dogsPath, dogHandler.Change)
 	e.DELETE(dogsPath, dogHandler.Delete)
+
+	// user routs
+	e.PUT("/users/registration/", userHandler.Create)
+	e.PUT(usersPath, userHandler.Login)
+	e.DELETE(usersPath, userHandler.Logout)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

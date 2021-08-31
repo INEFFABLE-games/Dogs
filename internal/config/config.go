@@ -17,7 +17,6 @@ type Config struct {
 
 // NewConfig create new config object.
 func NewConfig() *Config {
-
 	cfg := Config{}
 	if err := env.Parse(&cfg); err != nil {
 		log.WithFields(log.Fields{
