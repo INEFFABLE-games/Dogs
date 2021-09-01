@@ -21,6 +21,12 @@ type Token struct {
 	Value string `json:"value" validate:"required"`
 }
 
+type Bird struct {
+	Owner string `json:"owner" bson:"owner"`
+	Name  string `json:"name" bson:"name" validate:"required"`
+	Type  string `json:"type" bson:"type" validate:"required"`
+}
+
 // CustomClaims structure for jwt token generation claim.
 type CustomClaims struct {
 	Login string
