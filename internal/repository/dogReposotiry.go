@@ -12,8 +12,8 @@ type DogRepository struct {
 	db *sql.DB
 }
 
-// ValidateToken check is token exists.
-func (d *DogRepository) ValidateToken(ctx context.Context, token string) (models.Token, error) {
+// CheckToken check is token exists.
+func (d *DogRepository) CheckToken(ctx context.Context, token string) (models.Token, error) {
 
 	result := models.Token{}
 
