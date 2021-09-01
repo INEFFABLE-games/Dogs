@@ -17,11 +17,6 @@ import (
 	"net/http"
 )
 
-type server struct {
-	dogRepo  repository.DogRepository
-	userRepo repository.UserRepository
-}
-
 type customValidator struct {
 	validator *validator.Validate
 }
