@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"main/internal/models"
 	"main/internal/service"
 	"net/http"
@@ -25,6 +26,8 @@ type DogHandler struct {
 func (h *DogHandler) Create(c echo.Context) error {
 	dog := models.Dog{}
 
+	userLogin := c.Get("Login")
+
 	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
 
 	err := c.Bind(&dog)
@@ -45,7 +48,7 @@ func (h *DogHandler) Create(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer cancel()
 
-	err = h.dogService.Create(ctx, dog, token)
+	err = h.dogService.Create(ctx, dog, token, fmt.Sprintf("%s", userLogin))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": dogHandler,
@@ -67,10 +70,12 @@ func (h *DogHandler) Create(c echo.Context) error {
 func (h *DogHandler) Get(c echo.Context) error {
 	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
 
+	userLogin := c.Get("Login")
+
 	ctx, cancle := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer cancle()
 
-	resultDog, err := h.dogService.Get(ctx, token)
+	resultDog, err := h.dogService.Get(ctx, token, fmt.Sprintf("%s", userLogin))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": dogHandler,
@@ -91,6 +96,8 @@ func (h *DogHandler) Get(c echo.Context) error {
 // Change func for echo request.
 func (h *DogHandler) Change(c echo.Context) error {
 	dog := models.Dog{}
+
+	userLogin := c.Get("Login")
 
 	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
 
@@ -114,7 +121,7 @@ func (h *DogHandler) Change(c echo.Context) error {
 	defer cancle()
 
 	// check is dog exist
-	_, err = h.dogService.Get(ctx, token)
+	_, err = h.dogService.Get(ctx, token, fmt.Sprintf("%s", userLogin))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": dogHandler,
@@ -147,10 +154,12 @@ func (h *DogHandler) Delete(c echo.Context) error {
 
 	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
 
+	userLogin := c.Get("Login")
+
 	ctx, canlce := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer canlce()
 
-	err := h.dogService.Delete(ctx, token)
+	err := h.dogService.Delete(ctx, token, fmt.Sprintf("%s", userLogin))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": dogHandler,
