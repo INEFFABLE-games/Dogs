@@ -4,10 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/golang-jwt/jwt"
 	log "github.com/sirupsen/logrus"
-	"time"
-
 	"main/internal/models"
 )
 
@@ -38,22 +35,10 @@ func (u *UserRepository) Get(ctx context.Context, usr models.User) (models.User,
 	return resultUser, err
 }
 
-// CreateToken create new token and execute query to add token in database.
-func (u *UserRepository) CreateToken(ctx context.Context, login string) (string, error) {
-	claims := models.CustomClaims{
-		Login: login,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Second * 30).Unix(),
-			Issuer:    "",
-		},
-	}
+// InsertToken create new token and execute query to add token in database.
+func (u *UserRepository) InsertToken(ctx context.Context, login string, token string) (string, error) {
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SigningString()
-	if err != nil {
-		return "", err
-	}
-
-	_, err = u.db.ExecContext(ctx,
+	_, err := u.db.ExecContext(ctx,
 		"insert into tokens(login,value) values($1,$2)",
 		login,
 		token,
@@ -66,17 +51,55 @@ func (u *UserRepository) CreateToken(ctx context.Context, login string) (string,
 	return token, nil
 }
 
+// UpdateToken create new token and execute query to add token in database.
+func (u *UserRepository) UpdateToken(ctx context.Context, login string, token string) (string, error) {
+
+	_, err := u.db.ExecContext(ctx,
+		"update tokens set value=$1 where login=$2",
+		token,
+		login,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+// CheckToken create new token and execute query to add token in database.
+func (u *UserRepository) CheckToken(ctx context.Context, login string) (bool, error) {
+
+	tok := models.Token{}
+
+	err := u.db.QueryRowContext(ctx,
+		"select * from tokens where login=$1",
+		login,
+	).Scan(&tok.Login, &tok.Value)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // Login check is user exist and create new token for user.
-func (u *UserRepository) Login(ctx context.Context, usr models.User) (string, error) {
+func (u *UserRepository) Login(ctx context.Context, usr models.User, token string) (string, error) {
 	_, err := u.Get(ctx, usr)
 	if err != nil {
 		return "", err
 	}
 
-	token, err := u.CreateToken(ctx, usr.Login)
-	if err != nil {
-		return "", err
+	isTokenAlreadyExists, err := u.CheckToken(ctx, usr.Login)
+	if !isTokenAlreadyExists {
+		token, err = u.InsertToken(ctx, usr.Login, token)
+		if err != nil {
+			return "", err
+		}
 	}
+
+	token, err = u.UpdateToken(ctx, usr.Login, token)
 
 	return token, nil
 }
