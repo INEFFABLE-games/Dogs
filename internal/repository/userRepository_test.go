@@ -52,7 +52,9 @@ func TestUserRepository_Login(t *testing.T) {
 	_, err = r.Login(ctx, models.User{
 		Login:    "testlogin",
 		Password: "testpassword",
-	})
+	},
+		"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dpbiI6InRlc3Rsb2dpbiIsImV4cCI6MTYzMDQwMDYyNn0",
+	)
 
 	require.Nil(t, err)
 }
