@@ -30,10 +30,10 @@ func (d *DogRepository) CheckToken(ctx context.Context, token string) (models.To
 }
 
 // Create insert add query in db.
-func (d *DogRepository) Create(ctx context.Context, dog models.Dog, owner string) error {
+func (d *DogRepository) Create(ctx context.Context, dog models.Dog) error {
 	_, err := d.db.ExecContext(ctx,
 		"insert into dogs(Owner,Name,Gender) values($1,$2,$3)",
-		owner,
+		dog.Owner,
 		dog.Name,
 		dog.Gender,
 	)
@@ -53,12 +53,12 @@ func (d *DogRepository) Get(ctx context.Context, owner string) (models.Dog, erro
 }
 
 // Change insert change query in db.
-func (d *DogRepository) Change(ctx context.Context, owner string, dog models.Dog) error {
+func (d *DogRepository) Change(ctx context.Context, dog models.Dog) error {
 	_, err := d.db.ExecContext(ctx,
 		"update dogs set name = $1, gender = $2 where owner = $3",
 		dog.Name,
 		dog.Gender,
-		owner,
+		dog.Owner,
 	)
 
 	return err
