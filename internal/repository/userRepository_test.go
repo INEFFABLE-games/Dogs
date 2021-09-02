@@ -49,11 +49,7 @@ func TestUserRepository_Login(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*ctxtime)
 	defer cancel()
 
-	_, err = r.Get(ctx, models.User{
-		Login:    "testlogin",
-		Password: "testpassword",
-	},
-	)
+	_, err = r.GetByLogin(ctx, "testlogin")
 
 	require.Nil(t, err)
 }
