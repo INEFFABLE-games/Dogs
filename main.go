@@ -69,15 +69,15 @@ func main() {
 	}
 
 	//dog routs
-	e.PUT(dogsPath, dogHandler.Create, middleware2.JWTWithConfig(jwtConfig), middleware.SetUserData(jwtConfig))
-	e.GET(dogsPath, dogHandler.Get, middleware2.JWTWithConfig(jwtConfig), middleware.SetUserData(jwtConfig))
-	e.POST(dogsPath, dogHandler.Change, middleware2.JWTWithConfig(jwtConfig), middleware.SetUserData(jwtConfig))
-	e.DELETE(dogsPath, dogHandler.Delete, middleware2.JWTWithConfig(jwtConfig), middleware.SetUserData(jwtConfig))
+	e.PUT(dogsPath, dogHandler.Create, middleware.AuthenticateToken(jwtConfig))
+	e.GET(dogsPath, dogHandler.Get, middleware.AuthenticateToken(jwtConfig))
+	e.POST(dogsPath, dogHandler.Change, middleware.AuthenticateToken(jwtConfig))
+	e.DELETE(dogsPath, dogHandler.Delete, middleware.AuthenticateToken(jwtConfig))
 
 	// user routs
 	e.PUT("/users/registration/", userHandler.Create)
 	e.PUT(usersPath, userHandler.Login)
-	e.DELETE(usersPath, userHandler.Logout, middleware2.JWTWithConfig(jwtConfig), middleware.SetUserData(jwtConfig))
+	e.DELETE(usersPath, userHandler.Logout, middleware.AuthenticateToken(jwtConfig))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
