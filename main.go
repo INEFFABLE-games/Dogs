@@ -54,7 +54,10 @@ func main() {
 	dogHandler := handler.NewDogHandler(dogService)
 
 	userService := service.NewUserService(*repository.NewUserRepository(conn))
-	userHandler := handler.NewUserHandler(userService)
+	authService := service.NewAuthService(*repository.NewTokenRepository(conn))
+
+	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	e := echo.New()
 	e.Validator = &customValidator{validator: validator.New()}
@@ -62,8 +65,16 @@ func main() {
 	dogsPath := "/dogs/"
 	usersPath := "/users/"
 
+	// JWT config
 	jwtConfig := middleware2.JWTConfig{
 		SigningKey: []byte("dog"),
+		Claims:     &models.CustomClaims{},
+		ContextKey: "Data",
+	}
+
+	// RT config
+	rtConfig := middleware2.JWTConfig{
+		SigningKey: []byte("RefTokKey"),
 		Claims:     &models.CustomClaims{},
 		ContextKey: "Data",
 	}
@@ -78,6 +89,9 @@ func main() {
 	e.PUT("/users/registration/", userHandler.Create)
 	e.PUT(usersPath, userHandler.Login)
 	e.DELETE(usersPath, userHandler.Logout, middleware.AuthenticateToken(jwtConfig))
+
+	// Authentication routs
+	e.PUT("/users/Authentication/", authHandler.RefreshTokens, middleware.AuthenticateToken(rtConfig))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
