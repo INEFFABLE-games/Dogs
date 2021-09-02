@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"golang.org/x/crypto/bcrypt"
 	"main/internal/models"
 	"main/internal/repository"
 )
@@ -13,23 +14,30 @@ type UserService struct {
 
 // Create calls create func on user repository.
 func (u *UserService) Create(ctx context.Context, usr models.User) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(usr.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	usr.Password = string(hashedPassword)
+
 	return u.userRepo.Create(ctx, usr)
 }
 
 // Login call login func on user repository.
-func (u *UserService) Login(ctx context.Context, usr models.User) (string, error) {
+func (u *UserService) Login(ctx context.Context, usr models.User) error {
 
-	_, err := u.userRepo.Get(ctx, usr)
+	userFromDatabase, err := u.userRepo.GetByLogin(ctx, usr.Login)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	token, err := CreateToken(usr.Login)
+	err = bcrypt.CompareHashAndPassword([]byte(userFromDatabase.Password), []byte(usr.Password))
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return token, err
+	return err
 }
 
 // Logout calls logout func on user repository.
