@@ -6,7 +6,6 @@ import (
 	"main/internal/models"
 	"main/internal/service"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -81,7 +80,7 @@ func (u *UserHandler) Login(c echo.Context) error {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": userHandler,
-			"action":  "create",
+			"action":  "login",
 		}).Errorf(err.Error())
 
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -97,9 +96,8 @@ func (u *UserHandler) Login(c echo.Context) error {
 
 // Logout handle logout request from echo.
 func (u *UserHandler) Logout(c echo.Context) error {
-	token := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer ")
 
-	err := u.userService.Logout(c.Request().Context(), token)
+	err := u.userService.Logout(c.Request().Context())
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": userHandler,
