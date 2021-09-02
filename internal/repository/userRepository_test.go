@@ -49,11 +49,10 @@ func TestUserRepository_Login(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*ctxtime)
 	defer cancel()
 
-	_, err = r.Login(ctx, models.User{
+	_, err = r.Get(ctx, models.User{
 		Login:    "testlogin",
 		Password: "testpassword",
 	},
-		"eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dpbiI6InRlc3Rsb2dpbiIsImV4cCI6MTYzMDQwMDYyNn0",
 	)
 
 	require.Nil(t, err)
@@ -73,7 +72,7 @@ func TestUserRepository_Logout(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*ctxtime)
 	defer cancel()
 
-	err = r.Logout(ctx, "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dpbiI6InRlc3Rsb2dpbiIsImV4cCI6MTYzMDQwMDYyNn0")
+	err = r.Logout(ctx)
 
 	require.Nil(t, err)
 }
