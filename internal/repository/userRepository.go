@@ -22,12 +22,11 @@ func (u *UserRepository) Create(ctx context.Context, usr models.User) error {
 }
 
 // Get execute query to get user from database and returns user object.
-func (u *UserRepository) Get(ctx context.Context, usr models.User) (models.User, error) {
+func (u *UserRepository) GetByLogin(ctx context.Context, login string) (models.User, error) {
 	resultUser := models.User{}
 	err := u.db.QueryRowContext(ctx,
-		"select * from users where login=$1 and password=$2",
-		usr.Login,
-		usr.Password,
+		"select * from users where login=$1",
+		login,
 	).Scan(&resultUser.Login, &resultUser.Password)
 
 	return resultUser, err
