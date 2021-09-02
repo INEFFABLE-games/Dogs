@@ -86,7 +86,7 @@ func (u *UserHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	JWT, RT, err := u.authService.CreateTokens(ctx, usr.Login)
+	JWT, RT, err := u.authService.RefreshTokens(ctx, usr.Login)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": userHandler,
