@@ -25,7 +25,7 @@ func AuthenticateToken(config middleware.JWTConfig) echo.MiddlewareFunc {
 			if err != nil {
 				return echo.NewHTTPError(
 					http.StatusBadRequest,
-					"couldn't parse token",
+					"unable to parse token",
 				)
 			}
 
