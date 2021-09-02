@@ -3,13 +3,12 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 	"main/internal/models"
 	"main/internal/service"
 	"net/http"
 	"time"
-
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
 )
 
 const userHandler = "user"
@@ -17,6 +16,7 @@ const userHandler = "user"
 // UserHandler creates new user handler.
 type UserHandler struct {
 	userService *service.UserService
+	authService *service.AuthService
 }
 
 // Create handle create request from echo.
@@ -76,7 +76,7 @@ func (u *UserHandler) Login(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
 	defer cancel()
 
-	token, err := u.userService.Login(ctx, usr)
+	err = u.userService.Login(ctx, usr)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"handler": userHandler,
@@ -86,12 +86,22 @@ func (u *UserHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	JWT, RT, err := u.authService.CreateTokens(ctx, usr.Login)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": userHandler,
+			"action":  "create tokens",
+		}).Errorf(err.Error())
+
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	log.WithFields(log.Fields{
 		"handler": userHandler,
 		"action":  "login",
-	}).Debug(fmt.Sprintf("User logined with token: %s", token))
+	}).Debug(fmt.Sprintf("User logined with tokens: JWT[%s] RT[%s]", JWT, RT))
 
-	return c.String(http.StatusOK, fmt.Sprintf("User logined with token: %s", token))
+	return c.String(http.StatusOK, fmt.Sprintf("User logined with tokens: JWT[%s]	RT[%s]", JWT, RT))
 }
 
 // Logout handle logout request from echo.
@@ -111,6 +121,6 @@ func (u *UserHandler) Logout(c echo.Context) error {
 }
 
 // NewUserHandler create new handler for echo.
-func NewUserHandler(userService *service.UserService) *UserHandler {
-	return &UserHandler{userService: userService}
+func NewUserHandler(userService *service.UserService, authService *service.AuthService) *UserHandler {
+	return &UserHandler{userService: userService, authService: authService}
 }
