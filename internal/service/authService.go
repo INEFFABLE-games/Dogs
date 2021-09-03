@@ -1,10 +1,10 @@
 package service
 
 import (
+	"Dogs/internal/models"
+	"Dogs/internal/repository"
 	"context"
 	"github.com/dgrijalva/jwt-go"
-	"main/internal/models"
-	"main/internal/repository"
 	"time"
 )
 

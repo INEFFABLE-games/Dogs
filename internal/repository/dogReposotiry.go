@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"Dogs/internal/models"
 	"context"
 	"database/sql"
 	"errors"
-	"main/internal/models"
 )
 
 // DogRepository creates new dog repository.

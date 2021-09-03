@@ -1,9 +1,9 @@
 package repository
 
 import (
+	"Dogs/internal/models"
 	"context"
 	"database/sql"
-	"main/internal/models"
 )
 
 type UserRepository struct {

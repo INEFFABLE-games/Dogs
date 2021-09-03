@@ -1,10 +1,10 @@
 package service
 
 import (
+	"Dogs/internal/models"
+	"Dogs/internal/repository"
 	"context"
 	"golang.org/x/crypto/bcrypt"
-	"main/internal/models"
-	"main/internal/repository"
 )
 
 // UserService create new user service object.

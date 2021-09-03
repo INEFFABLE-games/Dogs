@@ -1,10 +1,10 @@
 package service
 
 import (
+	"Dogs/internal/models"
+	"Dogs/internal/repository"
 	"context"
 	"errors"
-	"main/internal/models"
-	"main/internal/repository"
 )
 
 // DogService create new dog service.

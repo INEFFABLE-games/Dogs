@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"Dogs/internal/models"
+	"Dogs/internal/service"
 	"context"
 	"fmt"
-	"main/internal/models"
-	"main/internal/service"
 	"net/http"
 	"time"
 

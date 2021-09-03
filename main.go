@@ -1,6 +1,12 @@
 package main
 
 import (
+	"Dogs/internal/config"
+	"Dogs/internal/handler"
+	"Dogs/internal/middleware"
+	"Dogs/internal/models"
+	"Dogs/internal/repository"
+	"Dogs/internal/service"
 	"database/sql"
 	"fmt"
 	"github.com/go-playground/validator"
@@ -8,12 +14,6 @@ import (
 	middleware2 "github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
-	"main/internal/config"
-	"main/internal/handler"
-	"main/internal/middleware"
-	"main/internal/models"
-	"main/internal/repository"
-	"main/internal/service"
 	"net/http"
 )
 
@@ -58,6 +58,13 @@ func main() {
 
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService, authService)
+
+	/*grpcConn, err := grpc.Dial("localhost:1323", grpc.WithInsecure(), grpc.WithBlock());if err != nil{
+		log.Println(err)
+	}
+
+	client := proto.NewBirdServiceClient(grpcConn)
+	handler.NewBirdClient(client)*/
 
 	e := echo.New()
 	e.Validator = &customValidator{validator: validator.New()}

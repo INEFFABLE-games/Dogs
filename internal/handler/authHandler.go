@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"Dogs/internal/models"
+	"Dogs/internal/service"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
-	"main/internal/models"
-	"main/internal/service"
 	"net/http"
 	"strings"
 )
