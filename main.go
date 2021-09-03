@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Dogs/internal/Validators"
 	"Dogs/internal/config"
 	"Dogs/internal/handler"
 	"Dogs/internal/middleware"
@@ -14,23 +15,11 @@ import (
 	middleware2 "github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
-	"net/http"
+	"google.golang.org/grpc"
 )
 
-type customValidator struct {
-	validator *validator.Validate
-}
-
-func (cv *customValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		// Optionally, you could return the error to give each route more control over the status code
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return nil
-}
-
 func main() {
+
 	log.SetLevel(log.DebugLevel)
 	cfg := config.NewConfig()
 
@@ -49,9 +38,17 @@ func main() {
 		log.Errorf("main: unable to ping sql connection %v,", err)
 	}
 
+	grpcConn, err := grpc.Dial("localhost:1323", grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Println(err)
+	}
+
 	//s := newServer(repository.NewDogRepository(base), repository.NewUserRepository(base))
 	dogService := service.NewDogService(*repository.NewDogRepository(conn))
 	dogHandler := handler.NewDogHandler(dogService)
+
+	birdService := service.NewBirdService(grpcConn)
+	birdHandler := handler.NewBirdHandler(birdService)
 
 	userService := service.NewUserService(*repository.NewUserRepository(conn))
 	authService := service.NewAuthService(*repository.NewTokenRepository(conn))
@@ -59,18 +56,12 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService, authService)
 
-	/*grpcConn, err := grpc.Dial("localhost:1323", grpc.WithInsecure(), grpc.WithBlock());if err != nil{
-		log.Println(err)
-	}
-
-	client := proto.NewBirdServiceClient(grpcConn)
-	handler.NewBirdClient(client)*/
-
 	e := echo.New()
-	e.Validator = &customValidator{validator: validator.New()}
+	e.Validator = &Validators.CustomValidator{Validator: validator.New()}
 
 	dogsPath := "/dogs/"
 	usersPath := "/users/"
+	birdPath := "/birds/"
 
 	// JWT config
 	jwtConfig := middleware2.JWTConfig{
@@ -92,6 +83,12 @@ func main() {
 	e.POST(dogsPath, dogHandler.Change, middleware.AuthenticateToken(jwtConfig))
 	e.DELETE(dogsPath, dogHandler.Delete, middleware.AuthenticateToken(jwtConfig))
 
+	//bird routs
+	e.PUT(birdPath, birdHandler.Create, middleware.AuthenticateToken(jwtConfig))
+	e.GET(birdPath, birdHandler.Get, middleware.AuthenticateToken(jwtConfig))
+	e.POST(birdPath, birdHandler.Change, middleware.AuthenticateToken(jwtConfig))
+	e.DELETE(birdPath, birdHandler.Delete, middleware.AuthenticateToken(jwtConfig))
+
 	// user routs
 	e.PUT("/users/registration/", userHandler.Create)
 	e.PUT(usersPath, userHandler.Login)
@@ -100,5 +97,5 @@ func main() {
 	// Authentication routs
 	e.PUT("/users/Authentication/", authHandler.RefreshTokens, middleware.AuthenticateToken(rtConfig))
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":1333"))
 }

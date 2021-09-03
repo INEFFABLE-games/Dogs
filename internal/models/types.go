@@ -1,6 +1,8 @@
 package models
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"github.com/dgrijalva/jwt-go"
+)
 
 // Dog struct for dog object.
 type Dog struct {

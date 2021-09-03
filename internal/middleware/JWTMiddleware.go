@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"Dogs/internal/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"main/internal/models"
 	"net/http"
 	"strings"
 )

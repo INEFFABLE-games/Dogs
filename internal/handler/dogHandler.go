@@ -14,7 +14,7 @@ import (
 
 const dogHandler = "dog"
 
-const ctxTime = 5
+const ctxTime = time.Second * 5
 
 // DogHandler creates new dog handler.
 type DogHandler struct {
@@ -70,8 +70,8 @@ func (h *DogHandler) Get(c echo.Context) error {
 
 	userLogin := c.Get("Login")
 
-	ctx, cancle := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
-	defer cancle()
+	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*ctxTime)
+	defer cancel()
 
 	resultDog, err := h.dogService.Get(ctx, fmt.Sprintf("%s", userLogin))
 	if err != nil {
